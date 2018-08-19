@@ -1,0 +1,69 @@
+package edu.arizona.uas.feiranyang.bloodglucoselevelmonitor;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v4.app.DialogFragment;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.DatePicker;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+public class DatePickerFragment extends DialogFragment {
+
+    private DatePicker datePicker;
+    public static final String EXTRA_DATE = "xyz.codem.app";
+
+    // Create a new date chooser dialog.
+    public Dialog onCreateDialog(Bundle savedInstanceState){
+        Date date = (Date) getArguments().getSerializable("date");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        final int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        View v= LayoutInflater.from(getActivity()).inflate(R.layout.activity_date_picker_fragment,null);
+
+        datePicker = (DatePicker) v.findViewById(R.id.dialog_date_picker);
+        datePicker.init(year,month,day,null);
+        return new AlertDialog.Builder(getActivity()).setView(v).setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int year = datePicker.getYear();
+                        int month = datePicker.getMonth();
+                        int day = datePicker.getDayOfMonth();
+                        Date date = new GregorianCalendar(year, month,day).getTime();
+                        sendResult(Activity.RESULT_OK,date);
+                    }
+                }).create();
+    }
+
+    // return a new instance back with data
+    public static DatePickerFragment newInstance(Date date){
+        Bundle args = new Bundle();
+        args.putSerializable("date", date);
+
+        DatePickerFragment fragment = new DatePickerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    private void sendResult(int resultCode, Date date){
+        if(getTargetFragment() == null){
+            return;
+        }
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_DATE, date);
+        getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, intent);
+    }
+
+
+}
